@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+canvas {
+    max-height: 350px;
+}
+
+@media (max-width: 640px) {
+    canvas {
+        max-height: 250px;
+    }
+
+    #history-toggle {
+        align-self: stretch;
+        text-align: center;
+    }
+}
+
+.btn-secondary {
+    padding: 8px 16px;
+    background: white;
+    color: #475569;           /* slate-600 */
+    border: 2px solid #94a3b8; /* slate-400 */
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    display: inline-block;
+    line-height: 1.5;
+}
+
+.btn-secondary:hover {
+    background: #334155; /* slate-700 */
+    color: white;
+    border-color: #334155;
+}
+
+.message {
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.message.success {
+    background: #dcfce7; /* green-100 */
+    color: #166534;      /* green-800 */
+    border: 1px solid #bbf7d0; /* green-200 */
+}
+
+.message.error {
+    background: #fee2e2; /* red-100 */
+    color: #991b1b;      /* red-800 */
+    border: 1px solid #fecaca; /* red-200 */
+}
+
+.loading {
+    text-align: center;
+    color: #94a3b8; /* slate-400 */
+    font-style: italic;
+    padding: 2.5rem 0; /* py-10 */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* HTMX Loading Indicator */
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 200ms ease-in;
+}
+.htmx-request .htmx-indicator {
+    opacity: 1;
+}
+.htmx-request.htmx-indicator {
+    opacity: 1;
+}

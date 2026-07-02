@@ -1,0 +1,7 @@
+.git
+.github
+.gitignore
+*.db
+*.md
+test/
+screenshot.png

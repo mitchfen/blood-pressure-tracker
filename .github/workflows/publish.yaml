@@ -1,0 +1,33 @@
+name: Publish Container Image
+
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: "publish-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    env:
+      imageName: ghcr.io/mitchfen/blood-pressure-tracker:latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Login to ghcr.io
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build image
+        run: docker build -f deploy/Dockerfile -t ${{ env.imageName }} .
+
+      - name: Push image
+        run: docker push ${{ env.imageName }} 

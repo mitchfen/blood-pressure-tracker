@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bptracker
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bptracker-db
+  namespace: bptracker
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bptracker
+  namespace: bptracker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bptracker
+  template:
+    metadata:
+      labels:
+        app: bptracker
+    spec:
+      containers:
+      - name: bptracker
+        image: ghcr.io/mitchfen/blood-pressure-tracker:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: DB_PATH
+          value: /data/bp.db
+        volumeMounts:
+        - name: db
+          mountPath: /data
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: db
+        persistentVolumeClaim:
+          claimName: bptracker-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bptracker
+  namespace: bptracker
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: bptracker
