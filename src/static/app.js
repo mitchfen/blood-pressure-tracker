@@ -165,41 +165,13 @@ window.addEventListener('resize', renderChart);
 // Load chart on page load
 document.addEventListener('DOMContentLoaded', loadChart);
 
-// Reload chart on form submission
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelector('form').addEventListener('htmx:afterRequest', function(event) {
-        const messageContainer = document.getElementById('message-container');
-        
-        if (event.detail.xhr.status === 200) {
-            messageContainer.innerHTML = '<div class="message success">✓ Blood pressure recorded successfully!</div>';
-            document.getElementById('systolic').value = '';
-            document.getElementById('diastolic').value = '';
-            setTimeout(() => {
-                messageContainer.innerHTML = '';
-                loadChart();
-            }, 1500);
-        } else {
-            messageContainer.innerHTML = '<div class="message error">✗ Failed to record blood pressure</div>';
-            setTimeout(() => {
-                messageContainer.innerHTML = '';
-            }, 3000);
-        }
-    });
+// Reload chart on HTMX bpUpdated event
+document.body.addEventListener('bpUpdated', function() {
+    loadChart();
+    
+    // Clear message after 3 seconds
+    setTimeout(() => {
+        const msg = document.getElementById('message-container');
+        if (msg) msg.innerHTML = '';
+    }, 3000);
 });
-
-async function importCSV(input) {
-    const messageContainer = document.getElementById('message-container');
-    const formData = new FormData();
-    formData.append('file', input.files[0]);
-
-    try {
-        const response = await fetch('/api/bps/import', { method: 'POST', body: formData });
-        const result = await response.json();
-        messageContainer.innerHTML = `<div class="message success">✓ Imported ${result.imported} records</div>`;
-        input.value = '';
-        setTimeout(() => { messageContainer.innerHTML = ''; loadChart(); }, 1500);
-    } catch (error) {
-        messageContainer.innerHTML = '<div class="message error">✗ Failed to import CSV</div>';
-        setTimeout(() => { messageContainer.innerHTML = ''; }, 3000);
-    }
-}

@@ -128,8 +128,9 @@ func recordBP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "success", "message": "Blood pressure recorded"})
+	w.Header().Set("HX-Trigger", "bpUpdated")
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte(`<div class="message success">✓ Blood pressure recorded successfully!</div>`))
 }
 
 func handleBPs(w http.ResponseWriter, r *http.Request) {
@@ -233,6 +234,7 @@ func handleImport(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{"status": "success", "imported": imported})
+	w.Header().Set("HX-Trigger", "bpUpdated")
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte(fmt.Sprintf(`<div class="message success">✓ Imported %d records</div>`, imported)))
 }
