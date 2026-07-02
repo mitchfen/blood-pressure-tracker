@@ -33,6 +33,7 @@ spec:
       containers:
       - name: bptracker
         image: ghcr.io/mitchfen/blood-pressure-tracker:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
