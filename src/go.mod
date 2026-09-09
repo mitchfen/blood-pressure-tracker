@@ -1,5 +1,5 @@
 module blood-pressure-tracker
 
-go 1.22
+go 1.27
 
-require github.com/mattn/go-sqlite3 v1.14.49
+require github.com/mattn/go-sqlite3 v1.14.52
