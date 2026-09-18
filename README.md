@@ -1,7 +1,7 @@
 # Blood Pressure Tracker
 
 A simple blood pressure tracking app.  
-Hosted on a home k3s cluster, replacing proprietary alternatives.
+Hosted on my [homelab k3s cluster](https://github.com/mitchfen/homelab), replacing proprietary alternatives.
 
 ## Features
 
