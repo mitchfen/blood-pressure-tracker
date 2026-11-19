@@ -6,7 +6,10 @@ Hosted on my [homelab k3s cluster](https://github.com/mitchfen/homelab), replaci
 ## Features
 
 - Record daily blood pressure (Systolic / Diastolic)
-- Blood pressure history visualization
-- Highlights the pulse pressure (gap between systolic and diastolic)
-- CSV export and import
-- Persistent SQLite database
+- Blood pressure history visualization with pulse pressure gap
+- AHA Cardio Health Zone categorization badges (Normal, Elevated, Stage 1, Stage 2, Crisis)
+- XP & Leveling progression system with streak bonuses
+- Daily streak tracking with flame multiplier
+- Micro-delight feedback (confetti celebrations & level-up animations)
+- CSV export and import (with automatic stats recalculation)
+- Persistent SQLite database (survives container restarts)

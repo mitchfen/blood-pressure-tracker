@@ -12,41 +12,142 @@
     <link rel="stylesheet" href="/static/styles.css">
     <script src="https://unpkg.com/chart.js"></script>
     <script src="https://unpkg.com/htmx.org"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen p-5 flex justify-center items-start">
-    <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-5 sm:p-10">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 sm:p-6 flex justify-center items-start">
+    <div class="bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-2xl max-w-3xl w-full p-5 sm:p-8 border border-slate-800">
 
-        <div class="bg-slate-50 p-5 sm:p-6 rounded-lg mb-8">
+        <!-- Gamification Hub Card -->
+        <div id="gamification-card" class="mb-6 bg-slate-950/60 text-white rounded-xl p-5 shadow-inner border border-slate-800">
+            <div>
+                <!-- Level & Streak Row -->
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                    <!-- Level Badge & Rank -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-600 via-red-500 to-amber-500 shadow-md font-black text-xl text-white tracking-wider border border-white/20 select-none" id="user-level-badge">
+                            L<span id="user-level">1</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs uppercase tracking-wider text-slate-400 font-bold">Level Progression</span>
+                                <span id="level-title" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-rose-300">Heart Initiate</span>
+                            </div>
+                            <div class="text-sm font-semibold text-slate-200">
+                                <span id="user-total-xp">0</span> <span class="text-xs text-slate-400 font-normal">Total XP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Streak Badge -->
+                    <div class="flex items-center gap-3 bg-white/5 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-white/10">
+                        <span class="text-2xl select-none" id="streak-flame">🔥</span>
+                        <div class="text-right">
+                            <div class="text-xs text-slate-400 font-medium">Daily Streak</div>
+                            <div class="text-sm font-bold text-amber-400">
+                                <span id="streak-count">0</span> Days
+                                <span class="text-xs font-normal text-slate-400 ml-1">(Best: <span id="longest-streak">0</span>)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- XP Progress Bar -->
+                <div class="mb-4">
+                    <div class="flex justify-between items-center text-xs font-semibold mb-1.5 text-slate-300">
+                        <span>Progress to Level <span id="next-level">2</span></span>
+                        <span><span id="xp-in-level">0</span> / <span id="xp-needed">100</span> XP (<span id="progress-percent">0</span>%)</span>
+                    </div>
+                    <div class="w-full bg-slate-800/80 rounded-full h-3 p-0.5 overflow-hidden backdrop-blur-sm border border-white/10">
+                        <div id="xp-bar" class="h-full rounded-full bg-gradient-to-r from-red-500 via-rose-400 to-amber-400 transition-all duration-700 ease-out shadow-sm" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Latest Reading & Health Zone Summary -->
+                <div id="latest-vitals-card" class="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-400">Latest Reading:</span>
+                        <span id="latest-bp-reading" class="font-bold text-white text-sm">--/--</span>
+                        <span id="latest-zone-badge" class="px-2.5 py-0.5 rounded-md font-semibold text-xs bg-slate-800 text-slate-300 border border-slate-700">No data yet</span>
+                    </div>
+                    <div class="text-slate-400" id="latest-pulse-gap">
+                        Pulse Pressure: <span id="pulse-pressure-val" class="font-medium text-slate-200">--</span> mmHg
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logging Form Section -->
+        <div class="bg-slate-950/60 p-5 sm:p-6 rounded-xl border border-slate-800 mb-6 shadow-inner">
             <div id="message-container"></div>
             <form hx-post="/api/bp" hx-target="#message-container" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful) this.reset()">
-                <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+                <div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
                     <div class="flex-1 flex gap-3">
                         <div class="flex-1">
-                            <label for="systolic" class="block text-slate-600 font-semibold text-sm mb-2">Systolic (Top)</label>
-                            <input type="number" id="systolic" name="systolic" step="1" min="0" placeholder="e.g., 120" required
-                                class="w-full px-3 py-3 border-2 border-slate-300 rounded-md text-base focus:outline-none focus:border-red-400 transition-colors">
+                            <label for="systolic" class="block text-slate-300 font-semibold text-xs uppercase tracking-wider mb-1.5">Systolic (Top)</label>
+                            <input type="number" id="systolic" name="systolic" step="1" min="0" max="300" placeholder="e.g., 120" required
+                                class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-lg text-white font-medium placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all">
                         </div>
                         <div class="flex-1">
-                            <label for="diastolic" class="block text-slate-600 font-semibold text-sm mb-2">Diastolic (Bottom)</label>
-                            <input type="number" id="diastolic" name="diastolic" step="1" min="0" placeholder="e.g., 80" required
-                                class="w-full px-3 py-3 border-2 border-slate-300 rounded-md text-base focus:outline-none focus:border-red-400 transition-colors">
+                            <label for="diastolic" class="block text-slate-300 font-semibold text-xs uppercase tracking-wider mb-1.5">Diastolic (Bottom)</label>
+                            <input type="number" id="diastolic" name="diastolic" step="1" min="0" max="200" placeholder="e.g., 80" required
+                                class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-lg text-white font-medium placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all">
                         </div>
                     </div>
                     <button type="submit" hx-indicator="#loading"
-                        class="w-full sm:w-auto px-6 py-3 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition-colors text-base whitespace-nowrap disabled:bg-slate-300 disabled:cursor-not-allowed cursor-pointer">
-                        Record
+                        class="w-full sm:w-auto px-7 py-2.5 bg-gradient-to-r from-rose-600 via-red-500 to-amber-500 text-white rounded-lg font-bold hover:brightness-110 active:scale-98 transition-all text-base whitespace-nowrap shadow-lg shadow-rose-950/50 cursor-pointer disabled:opacity-50">
+                        Record Reading
                     </button>
                 </div>
             </form>
         </div>
 
-        <div class="bg-slate-50 p-5 sm:p-6 rounded-lg min-h-[280px] sm:min-h-[300px] flex flex-col justify-center">
-            <button id="history-toggle" class="btn-secondary self-end sm:self-end mb-3" type="button" onclick="toggleHistory()" style="display:none;"></button>
-            <div id="chart-empty-state" class="loading" style="display:none;">No BP data yet. Record your first reading!</div>
+        <!-- Chart Section -->
+        <div class="bg-slate-950/60 p-5 sm:p-6 rounded-xl border border-slate-800 min-h-[280px] sm:min-h-[300px] flex flex-col justify-center mb-6 shadow-inner">
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-xs uppercase tracking-wider text-slate-400 font-bold">
+                    Blood Pressure History
+                </div>
+                <button id="history-toggle" class="btn-secondary" type="button" onclick="toggleHistory()" style="display:none;"></button>
+            </div>
+            <div id="chart-empty-state" class="loading" style="display:none;">No BP data yet. Record your first reading to earn XP!</div>
             <canvas id="bpChart"></canvas>
         </div>
 
-        <div class="flex flex-wrap gap-2 mt-4">
+        <!-- Cardio Health Zones Reference Accordion / Pill Guide -->
+        <details class="mb-6 bg-slate-950/60 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-400 group cursor-pointer transition-all">
+            <summary class="font-semibold text-slate-300 flex items-center justify-between list-none select-none">
+                <span class="flex items-center gap-1.5">
+                    <span>❤️</span>
+                    <span>American Heart Association (AHA) BP Categories Reference</span>
+                </span>
+                <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 mt-3 pt-3 border-t border-slate-800">
+                <div class="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800/80 text-emerald-300">
+                    <div class="font-bold">Normal</div>
+                    <div class="text-emerald-400/80">&lt; 120 &amp; &lt; 80</div>
+                </div>
+                <div class="p-2 rounded-lg bg-amber-950/60 border border-amber-800/80 text-amber-300">
+                    <div class="font-bold">Elevated</div>
+                    <div class="text-amber-400/80">120-129 &amp; &lt; 80</div>
+                </div>
+                <div class="p-2 rounded-lg bg-orange-950/60 border border-orange-800/80 text-orange-300">
+                    <div class="font-bold">Stage 1</div>
+                    <div class="text-orange-400/80">130-139 or 80-89</div>
+                </div>
+                <div class="p-2 rounded-lg bg-rose-950/60 border border-rose-800/80 text-rose-300">
+                    <div class="font-bold">Stage 2</div>
+                    <div class="text-rose-400/80">&ge; 140 or &ge; 90</div>
+                </div>
+                <div class="p-2 rounded-lg bg-rose-900/80 border border-rose-700 text-rose-100">
+                    <div class="font-bold">Crisis</div>
+                    <div class="text-rose-200/80">&gt; 180 and/or &gt; 120</div>
+                </div>
+            </div>
+        </details>
+
+        <!-- Actions / CSV -->
+        <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-800">
             <a href="/api/bps/export" class="btn-secondary">Export CSV</a>
             <label for="csv-file" class="btn-secondary">Import CSV</label>
             <input type="file" id="csv-file" name="file" accept=".csv" style="display:none;" hx-post="/api/bps/import" hx-encoding="multipart/form-data" hx-target="#message-container" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful) this.value = ''">
